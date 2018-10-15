@@ -1,0 +1,9 @@
+{
+    "type": "control",
+    "media": "Tschüß.m4a",
+    "specific":
+    {
+        "waittime_sec": 3.0,
+        "command": "sudo shutdown -h now"
+    }
+}
