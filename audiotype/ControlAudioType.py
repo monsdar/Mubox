@@ -8,13 +8,15 @@ can be executed. Examples:
 '''
 
 import os
+import time
+
 from mpd import MPDClient
 from audiotype.IAudioType import IAudioType
 
 class ControlAudioType(IAudioType):
     def __init__(self):
         pass
-0        
+
     def IsResponsible(self, typeIdentifier):
         return typeIdentifier == "control"
         
@@ -29,6 +31,4 @@ class ControlAudioType(IAudioType):
         os.system(configuration["specific"]["command"])
     
     def StopTag(self):
-        mpdClient = MPDClient() 
-        mpdClient.connect("localhost", 6600)
-        mpdClient.clear()
+        pass #do nothing, let the sound effect play to its end...

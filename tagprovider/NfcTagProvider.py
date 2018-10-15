@@ -34,7 +34,7 @@ class NfcTagProvider(ITagProvider):
     def Start(self):
         self.isRunning = True
         while(self.isRunning):
-            cycleRead(self.pn532)
+            self.cycleRead(self.pn532)
             
     def Stop(self):
         self.isRunning = False
@@ -50,14 +50,14 @@ class NfcTagProvider(ITagProvider):
         return pn532
     
     def cycleRead(self, givenReader):
-        self.uid = getNfcTagBlocking(givenReader)
-        text = readTextFromTag(givenReader)
+        self.uid = self.getNfcTagBlocking(givenReader)
+        text = self.readTextFromTag(givenReader)
         if not text:
             return
         
         self.onTagRecognized(text)
         
-        while(getNfcTag(givenReader) == uid): #calling getNfcTag will block for the duration of timeout
+        while(self.getNfcTag(givenReader) == self.uid): #calling getNfcTag will block for the duration of timeout
             pass #immediately query for the next nfc tag again. No time to waste through waiting...
         
         #when we land here the tag has been removed

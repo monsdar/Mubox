@@ -15,6 +15,7 @@ class EffectAudioType(IAudioType):
         return typeIdentifier == "effect"
         
     def PlayTag(self, tag, configuration):
+        print("Playing effect for " + configuration["media"])
         mpdClient = MPDClient() 
         mpdClient.connect("localhost", 6600)
         mpdClient.clear()

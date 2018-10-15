@@ -1,6 +1,6 @@
 {
     "type": "control",
-    "media": "Tschüß.m4a",
+    "media": "Controls/Tschüß.m4a",
     "specific":
     {
         "waittime_sec": 3.0,

@@ -1,5 +1,7 @@
 
-import glob
+import codecs
+import fnmatch
+import json
 import os
 
 from audiotype.ControlAudioType import ControlAudioType
@@ -42,23 +44,32 @@ class Mubox:
         #load the configs
         tagConfigs = {}
         scriptDir = os.path.dirname(os.path.realpath(__file__))
-        for filepath in glob.glob(scriptDir + '/media/*.json'):
-            tagName = os.path.filename(filepath)
-            tagConfigs[tagName] = json.load(filepath)
+        matches = []
+        for root, dirnames, filenames in os.walk('media'):
+            for filename in fnmatch.filter(filenames, '*.json'):
+                matches.append(os.path.join(root, filename))
+        for filepath in matches:
+            tagName = os.path.basename(filepath)[:-5]
+            print("Loading config for " + tagName)
+            tagConfigs[tagName] = json.load(codecs.open(filepath, encoding='utf-8'))
             
         if not tagContent in tagConfigs:
             print("Config for tag " + tagContent + " not found")
             return
         
         #Check which AudioType is responsible
-        typeToSearchFor = tagConfigs[tagContent]
+        typeToSearchFor = tagConfigs[tagContent]["type"]
         for type in self.audioTypes:
             if(type.IsResponsible(typeToSearchFor)):
                 self.currentAudioType = type
                 break
         
+        if not self.currentAudioType:
+            print("Cannot find a fitting AudioType for " + typeToSearchFor)
+            return
+        
         #Forward config to the AudioType, start its action
-        self.currentAudioType.PlayTag(tagContent, tagConfigs[tagContent["specific"]])
+        self.currentAudioType.PlayTag(tagContent, tagConfigs[tagContent])
         
     def onTagRemoved(self):
         #Call current AudioType, let it know that the tag has been removed
