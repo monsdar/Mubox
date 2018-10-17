@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 from gpiozero import Button, LED
 from signal import pause
 import os
@@ -17,10 +19,9 @@ led.blink(on_time=0.5, off_time=0.5)
 
 mpdClient = MPDClient() 
 mpdClient.connect("localhost", 6600)
-mpdClient.play(0)
 mpdClient.stop()
 mpdClient.clear()
-mpdClient.add("Hallo Mattis.m4a")
+mpdClient.add("Controls/Hallo Mattis.m4a")
 mpdClient.play(0)
 
 #this waits for the off switch to be pushed
@@ -32,7 +33,7 @@ mpdClient = MPDClient()
 mpdClient.connect("localhost", 6600)
 mpdClient.stop()
 mpdClient.clear()
-mpdClient.add("Tschüß.m4a")
+mpdClient.add("Controls/Tschüß.m4a")
 mpdClient.play(0)
 time.sleep(3.0)
 
