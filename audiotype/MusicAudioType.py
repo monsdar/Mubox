@@ -30,7 +30,7 @@ class MusicAudioType(IAudioType):
         
         filename = configuration["media"]
         if filename.endswith(".m3u"): #playlists need to be added via .load()
-            mpdClient.load(filename[:-4])
+            mpdClient.load(filename)
         else:                         #single audio files need to be added via add()
             mpdClient.add(filename)
         mpdClient.play(0)
