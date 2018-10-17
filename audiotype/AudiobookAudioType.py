@@ -28,6 +28,9 @@ class AudiobookAudioType(IAudioType):
             mpdClient.load(filename)
         else:                         #single audio files need to be added via add()
             mpdClient.add(filename)
+            
+        mpdClient.random(0)
+        mpdClient.repeat(0)
         mpdClient.play(0)
     
     def StopTag(self):
