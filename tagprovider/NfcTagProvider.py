@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 '''
 This TagProvider uses NFC to provide tagging events
@@ -6,7 +7,9 @@ This TagProvider uses NFC to provide tagging events
 import Adafruit_PN532 as PN532
 import binascii
 import re
+import sys
 import time
+import traceback
 from tagprovider.ITagProvider import ITagProvider
 
 # Setup how the PN532 is connected to the Raspbery Pi
@@ -78,10 +81,14 @@ class NfcTagProvider(ITagProvider):
                     print("Cannot read data!")
                     continue
                 dataByteStr += binascii.hexlify(data)
-            reResult = re.search('.*5402....(.*)fe', dataByteStr)
+            reResult = re.search('.*5402....(.*).*fe', dataByteStr)
             contentAsByteString = reResult.group(1)
-            return binascii.unhexlify(contentAsByteString)
+            result = binascii.unhexlify(contentAsByteString)
+            
+            #we need to split out everything that comes after char(254)... this is usually old data that hasn't been overwritten
+            return result.split(chr(254), 1)[0] #from https://stackoverflow.com/a/904756/199513
         except:
+            print(traceback.format_exc())
             return None
         
     def getNfcTag(self, givenReader, timeout=.2):
