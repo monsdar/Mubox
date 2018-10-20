@@ -6,7 +6,6 @@ import os
 
 from audiotype.ControlAudioType import ControlAudioType
 from audiotype.EffectAudioType import EffectAudioType
-from audiotype.AudiobookAudioType import AudiobookAudioType
 from audiotype.MusicAudioType import MusicAudioType
 
 from tagprovider.NfcTagProvider import NfcTagProvider
@@ -22,12 +21,13 @@ class Mubox:
         self.audioTypes = []
         controlAudioType   = ControlAudioType()
         effectAudioType    = EffectAudioType()
-        audiobookAudioType = AudiobookAudioType()
-        musicAudioType     = MusicAudioType()
+        musicAudioType     = MusicAudioType(1, "musicState.json", "music")
+        audiobookAudioType = MusicAudioType(0, "audiobookState.json", "audiobook")
+        
         self.audioTypes.append(controlAudioType)
         self.audioTypes.append(effectAudioType)
-        self.audioTypes.append(audiobookAudioType)
         self.audioTypes.append(musicAudioType)
+        self.audioTypes.append(audiobookAudioType)
     
         #Init and start TagProvider, subscribe onTagRecognized and onTagRemoved
         self.tagProvider = NfcTagProvider()
@@ -61,6 +61,7 @@ class Mubox:
         typeToSearchFor = tagConfigs[tagContent]["type"]
         for type in self.audioTypes:
             if(type.IsResponsible(typeToSearchFor)):
+                print("Handling '" + tagContent + "' with " + str(type))
                 self.currentAudioType = type
                 break
         
@@ -76,6 +77,7 @@ class Mubox:
         if not self.currentAudioType:
             print("Error! No active AudioType, cannot stop anything...")
         else:
+            print("Stopping " + str(self.currentAudioType))
             self.currentAudioType.StopTag()
             self.currentAudioType = None
 

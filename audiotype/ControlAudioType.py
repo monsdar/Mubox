@@ -25,6 +25,9 @@ class ControlAudioType(IAudioType):
         mpdClient.connect("localhost", 6600)
         mpdClient.clear()
         mpdClient.add(configuration["media"])
+        
+        mpdClient.random(0)
+        mpdClient.repeat(0)
         mpdClient.play(0)
         
         time.sleep(configuration["specific"]["waittime_sec"])
