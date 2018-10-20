@@ -15,6 +15,7 @@ This AudioType is optimized to play music
 
 import codecs
 import json
+import logging
 import os
 import datetime
 from random import randint
@@ -27,6 +28,7 @@ class MusicAudioType(IAudioType):
         self.statefile = statefile
         self.myType = myType
         self.currentTag = ""
+        self.logger = logging.getLogger("mubox.MusicAudioType")
 
     def IsResponsible(self, typeIdentifier):
         return typeIdentifier == self.myType
@@ -58,7 +60,7 @@ class MusicAudioType(IAudioType):
             else:
                 numSongs = mpdClient.status()["playlistlength"]
                 mpdClient.play(randint(0, int(numSongs)-1))
-        print("Starting to play " + str(mpdClient.currentsong()))
+        self.logger.info("Starting to play " + str(mpdClient.currentsong()))
     
     def StopTag(self):
         mpdClient = MPDClient() 

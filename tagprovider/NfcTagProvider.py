@@ -6,6 +6,7 @@ This TagProvider uses NFC to provide tagging events
 
 import Adafruit_PN532 as PN532
 import binascii
+import logging
 import re
 import sys
 import time
@@ -26,6 +27,7 @@ class NfcTagProvider(ITagProvider):
         self.onTagRemoved = None
         self.uid = None #this is the unique ID of the current tag that is present. None if no tag is present
         self.isRunning = False
+        self.logger = logging.getLogger("mubox.NfcTagProvider")
         self.pn532 = self.initNfcReader()
 
     def SubscribeTagRecognized(self, onTagRecognized):
@@ -45,17 +47,19 @@ class NfcTagProvider(ITagProvider):
     def initNfcReader(self):
         # Note: By using the NTAG203 compatible version of Adafruit_PN532 we do not need auth
         # See: https://github.com/laricchia/Adafruit_Python_PN532/
+        self.logger.info("Initing the NFC reader...")
         pn532 = PN532.PN532(cs=CS, sclk=SCLK, mosi=MOSI, miso=MISO)
         pn532.SAM_configuration()
         pn532.begin()
         ic, ver, rev, support = pn532.get_firmware_version()
-        print('...found PN532 with firmware version: {0}.{1}'.format(ver, rev))
+        self.logger.info('...found PN532 with firmware version: {0}.{1}'.format(ver, rev))
         return pn532
     
     def cycleRead(self, givenReader):
         self.uid = self.getNfcTagBlocking(givenReader)
         text = self.readTextFromTag(givenReader)
         if not text:
+            self.logger.debug("Cannot read from given tag with uid=" + str(self.uid))
             return
         
         self.onTagRecognized(text)
@@ -78,17 +82,17 @@ class NfcTagProvider(ITagProvider):
             for frame in [0,4,8]:
                 data = givenReader.mifare_classic_read_block(frame)
                 if not data:
-                    print("Cannot read data!")
+                    self.logger.warning("Cannot read data!")
                     continue
                 dataByteStr += binascii.hexlify(data)
             reResult = re.search('.*5402....(.*).*fe', dataByteStr)
             contentAsByteString = reResult.group(1)
             result = binascii.unhexlify(contentAsByteString)
             
-            #we need to split out everything that comes after char(254)... this is usually old data that hasn't been overwritten
+            #we need to split out everything that comes after (including) char(254)... this is usually old data that hasn't been overwritten
             return result.split(chr(254), 1)[0] #from https://stackoverflow.com/a/904756/199513
         except:
-            print(traceback.format_exc())
+            self.logger.error(traceback.format_exc())
             return None
         
     def getNfcTag(self, givenReader, timeout=.2):
@@ -97,5 +101,5 @@ class NfcTagProvider(ITagProvider):
     def getNfcTagBlocking(self, givenReader):
         uid = None
         while not uid:
-            uid = givenReader.read_passive_target(timeout_sec=1)
+            uid = givenReader.read_passive_target(timeout_sec=.2)
         return uid

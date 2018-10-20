@@ -4,18 +4,19 @@
 This AudioType plays a given sound effect once. The effect does not stop when removing the tag
 '''
 
+import logging
 from mpd import MPDClient
 from audiotype.IAudioType import IAudioType
 
 class EffectAudioType(IAudioType):
     def __init__(self):
-        pass
+        self.logger = logging.getLogger("mubox.EffectAudioType")
 
     def IsResponsible(self, typeIdentifier):
         return typeIdentifier == "effect"
         
     def PlayTag(self, tag, configuration):
-        print("Playing effect for " + configuration["media"])
+        self.logger.info("Playing effect for " + configuration["media"])
         mpdClient = MPDClient() 
         mpdClient.connect("localhost", 6600)
         mpdClient.clear()
