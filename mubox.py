@@ -4,6 +4,7 @@ import fnmatch
 import json
 import logging
 import os
+import traceback
 
 from audiotype.ControlAudioType import ControlAudioType
 from audiotype.EffectAudioType import EffectAudioType
@@ -11,11 +12,13 @@ from audiotype.MusicAudioType import MusicAudioType
 
 from tagprovider.NfcTagProvider import NfcTagProvider
 
+scriptDir = os.path.dirname(os.path.realpath(__file__))
+
 def main():
     #initing logging from https://docs.python.org/3/howto/logging-cookbook.html
     logger = logging.getLogger('mubox')
     logger.setLevel(logging.DEBUG)
-    fh = logging.FileHandler('/tmp/mubox.log')
+    fh = logging.FileHandler(scriptDir + '/mubox.log')
     fh.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
@@ -41,8 +44,8 @@ class Mubox:
         self.audioTypes = []
         controlAudioType   = ControlAudioType()
         effectAudioType    = EffectAudioType()
-        musicAudioType     = MusicAudioType(1, "musicState.json", "music")
-        audiobookAudioType = MusicAudioType(0, "audiobookState.json", "audiobook")
+        musicAudioType     = MusicAudioType(1, scriptDir + "/musicState.json", "music")
+        audiobookAudioType = MusicAudioType(0, scriptDir + "/audiobookState.json", "audiobook")
         self.audioTypes.append(controlAudioType)
         self.audioTypes.append(effectAudioType)
         self.audioTypes.append(musicAudioType)
