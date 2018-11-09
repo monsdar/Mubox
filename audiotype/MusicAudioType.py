@@ -80,13 +80,17 @@ class MusicAudioType(IAudioType):
     def StoreStatus(self, mpdClient):
         mpdClient.pause(1)
         mpdStatus = mpdClient.status()
-        status = {}
-        status["currentTag"] = self.currentTag
-        status["currentSong"] = mpdStatus["song"]
-        status["currentTime"] = mpdStatus["elapsed"]
-        status["currentTimestamp"] = self.GetDaysSince1970()
-        with open(self.statefile, 'w') as outfile:
-            json.dump(status, outfile, ensure_ascii=False)
+        if "song" in mpdStatus:
+            status = {}
+            status["currentTag"] = self.currentTag
+            status["currentSong"] = mpdStatus["song"]
+            status["currentTime"] = mpdStatus["elapsed"]
+            status["currentTimestamp"] = self.GetDaysSince1970()
+            with open(self.statefile, 'w') as outfile:
+                json.dump(status, outfile, ensure_ascii=False)
+        else:
+            if self.HasStatus():
+                os.remove(self.statefile)
     
     def HasStatus(self):
         if os.path.isfile(self.statefile):
@@ -100,10 +104,16 @@ class MusicAudioType(IAudioType):
     def ContinuePlaying(self, givenTag):
         if self.HasStatus():
             state = self.GetStatus()
-            isTagEqual = state["currentTag"] == givenTag
+            isTagEqual = state["currentTag"].encode('utf-8') == givenTag
             isInTimeframe = (self.GetDaysSince1970() - state["currentTimestamp"]) < 1
+            
             if(isTagEqual and isInTimeframe):
+                self.logger.debug("Tags are equal, time diff close enough. Trying to continue where we left off")
                 return True
+            if not isTagEqual:
+                self.logger.debug("Given Tag is not equal to the previous one - not continuing where we left off")
+            if not isInTimeframe:
+                self.logger.debug("Time diff between this and last play too high (" + str(self.GetDaysSince1970() - state["currentTimestamp"]) + " days) - not continuing where we left off")
         return False
         
     def GetDaysSince1970(self):
