@@ -36,11 +36,14 @@ class MusicAudioType(IAudioType):
     def PlayTag(self, tag, configuration):
         self.currentTag = tag
     
+        filename = configuration["media"]
+        if not self.IsValidMusicFile(filename):
+            return
+    
         mpdClient = MPDClient() 
         mpdClient.connect("localhost", 6600)
         mpdClient.clear()
         
-        filename = configuration["media"]
         if filename.endswith(".m3u"): #playlists need to be added via .load()
             mpdClient.load(filename)
         else:                         #single audio files need to be added via add()
@@ -61,6 +64,14 @@ class MusicAudioType(IAudioType):
                 numSongs = mpdClient.status()["playlistlength"]
                 mpdClient.play(randint(0, int(numSongs)-1))
         self.logger.info("Starting to play " + str(mpdClient.currentsong()))
+    
+    def IsValidMusicFile(self, givenFile):
+        scriptDir = os.path.dirname(os.path.realpath(__file__))
+        fullPath = scriptDir + "/../media/" + givenFile
+        if not os.path.isfile(fullPath):
+            self.logger.debug("File does not exist: " + fullPath)
+            return False
+        return True
     
     def StopTag(self):
         mpdClient = MPDClient() 
